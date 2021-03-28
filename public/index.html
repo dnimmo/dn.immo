@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" initial-scale="1" />
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Hind:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <main id="root"></main>
+  <script src='/nimmo.js'></script>
+  <script>
+    const app =
+      Elm.Main.init({
+        node: document.getElementById('root'),
+      })
+
+    // window.addEventListener('resize', function () {
+    //   app.ports.viewportSizeChanged.send({ width: window.innerWidth, height: window.innerHeight })
+    // })
+
+  </script>
+</body>
+
+</html>
