@@ -10563,8 +10563,11 @@ var $elm$browser$Browser$application = _Browser_application;
 var $author$project$Main$Error = function (a) {
 	return {$: 'Error', a: a};
 };
+var $author$project$View$EmploymentHistory$NotDisplayingThread = {$: 'NotDisplayingThread'};
 var $author$project$Main$ViewingBlogs = {$: 'ViewingBlogs'};
-var $author$project$Main$ViewingEmploymentHistory = {$: 'ViewingEmploymentHistory'};
+var $author$project$Main$ViewingEmploymentHistory = function (a) {
+	return {$: 'ViewingEmploymentHistory', a: a};
+};
 var $author$project$Main$ViewingHomepage = {$: 'ViewingHomepage'};
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
@@ -10799,7 +10802,7 @@ var $author$project$Main$getStateFromUrl = function (url) {
 			case 'General':
 				return $author$project$Main$ViewingHomepage;
 			case 'EmploymentHistory':
-				return $author$project$Main$ViewingEmploymentHistory;
+				return $author$project$Main$ViewingEmploymentHistory($author$project$View$EmploymentHistory$NotDisplayingThread);
 			case 'Blogs':
 				return $author$project$Main$ViewingBlogs;
 			default:
@@ -10820,6 +10823,9 @@ var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
+};
+var $author$project$View$EmploymentHistory$DisplayingThread = function (a) {
+	return {$: 'DisplayingThread', a: a};
 };
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
@@ -10844,32 +10850,55 @@ var $author$project$Route$pushUrl = F2(
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'UrlRequested') {
-			if (msg.a.$ === 'Internal') {
-				var url = msg.a.a;
+		switch (msg.$) {
+			case 'UrlRequested':
+				if (msg.a.$ === 'Internal') {
+					var url = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								state: $author$project$Main$getStateFromUrl(url)
+							}),
+						A2(
+							$author$project$Route$pushUrl,
+							model.navKey,
+							A2(
+								$elm$core$Maybe$withDefault,
+								$author$project$Route$General,
+								$author$project$Route$fromUrl(url))));
+				} else {
+					var url = msg.a.a;
+					return _Utils_Tuple2(
+						model,
+						$elm$browser$Browser$Navigation$load(url));
+				}
+			case 'OpenThread':
+				var thread = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							state: $author$project$Main$getStateFromUrl(url)
+							state: $author$project$Main$ViewingEmploymentHistory(
+								$author$project$View$EmploymentHistory$DisplayingThread(thread))
 						}),
-					A2(
-						$author$project$Route$pushUrl,
-						model.navKey,
-						A2(
-							$elm$core$Maybe$withDefault,
-							$author$project$Route$General,
-							$author$project$Route$fromUrl(url))));
-			} else {
-				var url = msg.a.a;
+					$elm$core$Platform$Cmd$none);
+			case 'CloseThread':
 				return _Utils_Tuple2(
-					model,
-					$elm$browser$Browser$Navigation$load(url));
-			}
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					_Utils_update(
+						model,
+						{
+							state: $author$project$Main$ViewingEmploymentHistory($author$project$View$EmploymentHistory$NotDisplayingThread)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Main$CloseThread = {$: 'CloseThread'};
+var $author$project$Main$OpenThread = function (a) {
+	return {$: 'OpenThread', a: a};
+};
 var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
@@ -17175,18 +17204,10 @@ var $author$project$Components$navigation = F3(
 						slugs))
 				]));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Max = F2(
-	function (a, b) {
-		return {$: 'Max', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$maximum = F2(
-	function (i, l) {
-		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
-	});
-var $author$project$Components$setWidth = function (_int) {
-	return $mdgriffith$elm_ui$Element$width(
-		A2($mdgriffith$elm_ui$Element$maximum, _int, $mdgriffith$elm_ui$Element$fill));
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
 };
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
 var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 	return A2(
@@ -17231,8 +17252,6 @@ var $mdgriffith$elm_ui$Element$paragraph = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
-var $mdgriffith$elm_ui$Element$alignBottom = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Bottom);
 var $author$project$Colours$green = A3($mdgriffith$elm_ui$Element$rgb255, 43, 172, 118);
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
@@ -17246,19 +17265,17 @@ var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
 			'border-radius',
 			$elm$core$String$fromInt(radius) + 'px'));
 };
-var $author$project$Components$setHeight = function (_int) {
-	return $mdgriffith$elm_ui$Element$height(
-		A2($mdgriffith$elm_ui$Element$maximum, _int, $mdgriffith$elm_ui$Element$fill));
-};
 var $author$project$Components$statusIndicator = A2(
 	$mdgriffith$elm_ui$Element$el,
 	_List_fromArray(
 		[
 			$mdgriffith$elm_ui$Element$Border$rounded(50),
-			$author$project$Components$setHeight(10),
-			$author$project$Components$setWidth(10),
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(10)),
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$px(10)),
 			$mdgriffith$elm_ui$Element$Background$color($author$project$Colours$green),
-			$mdgriffith$elm_ui$Element$alignBottom
+			$mdgriffith$elm_ui$Element$alignTop
 		]),
 	$mdgriffith$elm_ui$Element$none);
 var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
@@ -17362,7 +17379,8 @@ var $author$project$Components$menu = F3(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-					$author$project$Components$setWidth(256),
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(256)),
 					$mdgriffith$elm_ui$Element$Background$color($author$project$Colours$darkBlue),
 					$mdgriffith$elm_ui$Element$Font$color($author$project$Colours$menuWhite)
 				]),
@@ -17372,6 +17390,8 @@ var $author$project$Components$menu = F3(
 					A3($author$project$Components$navigation, channelListExpanded, activeItem, channels)
 				]));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
+var $mdgriffith$elm_ui$Element$alignBottom = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Bottom);
 var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
 var $mdgriffith$elm_ui$Element$createNearby = F2(
 	function (loc, element) {
@@ -17401,7 +17421,8 @@ var $author$project$Components$date = function (str) {
 					$author$project$Components$edges,
 					{bottom: 1})),
 				$mdgriffith$elm_ui$Element$Border$color($author$project$Colours$lightGrey),
-				$author$project$Components$setHeight(13),
+				$mdgriffith$elm_ui$Element$height(
+				$mdgriffith$elm_ui$Element$px(13)),
 				A2($mdgriffith$elm_ui$Element$paddingXY, 0, 20),
 				$mdgriffith$elm_ui$Element$inFront(
 				A2(
@@ -17449,19 +17470,23 @@ var $mdgriffith$elm_ui$Element$Background$image = function (src) {
 	return $mdgriffith$elm_ui$Internal$Model$Attr(
 		A2($elm$virtual_dom$VirtualDom$style, 'background', 'url(\"' + (src + '\") center / cover no-repeat')));
 };
-var $author$project$Components$avatar = function (src) {
-	return A2(
-		$mdgriffith$elm_ui$Element$el,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$Border$rounded(20),
-				$mdgriffith$elm_ui$Element$Background$image('/img/' + src),
-				$author$project$Components$setWidth(37),
-				$author$project$Components$setHeight(37)
-			]),
-		$mdgriffith$elm_ui$Element$none);
-};
-var $author$project$Components$nimmoAvatar = $author$project$Components$avatar('nimmo.png');
+var $author$project$Components$avatar = F2(
+	function (size, src) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Border$rounded(20),
+					$mdgriffith$elm_ui$Element$Background$image('/img/' + src),
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(size)),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(size)),
+					$mdgriffith$elm_ui$Element$alignTop
+				]),
+			$mdgriffith$elm_ui$Element$none);
+	});
+var $author$project$Components$nimmoAvatarStandard = A2($author$project$Components$avatar, 37, 'nimmo.png');
 var $author$project$Components$post = F2(
 	function (content, maybeFinalElement) {
 		return A2(
@@ -17478,14 +17503,14 @@ var $author$project$Components$post = F2(
 				]),
 			_List_fromArray(
 				[
-					$author$project$Components$nimmoAvatar,
+					$author$project$Components$nimmoAvatarStandard,
 					A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(18)
+							$mdgriffith$elm_ui$Element$spacing(32)
 						]),
 					_Utils_ap(
 						_List_fromArray(
@@ -17752,88 +17777,328 @@ var $author$project$View$Blogs$view = A2(
 				]),
 				A2($elm$core$List$map, $author$project$View$Blogs$blogPost, $author$project$Content$Blogs$content)
 			])));
-var $author$project$View$EmploymentHistory$view = A2(
-	$mdgriffith$elm_ui$Element$column,
-	_List_fromArray(
-		[
-			$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-			$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-		]),
-	_List_fromArray(
-		[
-			$author$project$Components$channelHeading(
-			{description: 'Information about my employment history. Details in threads.', name: 'Employment History'}),
+var $author$project$Content$EmploymentHistory$content = _List_fromArray(
+	[
+		{
+		date: 'Jun 2020 - Now',
+		post: _List_fromArray(
+			['Full-stack engineer at MindGym']),
+		threadContent: _List_fromArray(
+			['As only the fourth software engineer at MindGym, I\'ve been heavily involved in everything that comes with a new engineering department. I\'ve been part of everything from platform architecture to hiring to choice of languages, as well as actually working on various projects.'])
+	},
+		{
+		date: 'Apr 2019 - Jun 2020',
+		post: _List_fromArray(
+			['Tech Lead at Click Travel - Front-End Architecture Team']),
+		threadContent: _List_fromArray(
+			['After deliberating over a number of tech choices (The front-runners being React, Vue, Clojurescript, and Elm), I ended up proposing Elm to the software engineering department, and got the go-ahead to introduce it. \n            \nSince then I’ve been leading the front-end team in implementing Elm, coming up with an on-boarding process, documenting our decisions, and supporting other engineers with the shift from React to Elm.'])
+	},
+		{
+		date: 'Apr 2017 - Apr 2019',
+		post: _List_fromArray(
+			['Senior Software Engineer at Click Travel - Pioneer Flights']),
+		threadContent: _List_fromArray(
+			['The Pioneer Flights team is responsible for aggregating flight information from a number of different carriers, and provides them through Click\'s own API in a consistent form for Click\'s client application: Travel.Cloud.', 'When I first joined the team, our JavaScript codebase was entirely without automated tests, had no automated build pipeline, and was quite convoluted and incredibly difficult to maintain or extend.', 'Shortly after joining the team, I set up automated pipelines for all of our projects, I introduced Functional Programming to both the team and the wider department, and introduced a set of coding standards for JavaScript (where none had existed before)', 'Over the course of around three months, I refactored our entire codebase in order to give us the ability to have sensible automated tests, and to reduce our recovery time from any live issues, as well as to make the codebase simpler to understand for any new starters we onboard in future.', 'This was a tremendous success, and led to being able to engender regular and ongoing discussions about our coding standards within the team, which has seen the entire team constantly learn and improve.', 'I also led a small team of engineers in the creation of a progressive web app to allow customers to access their travel itinerary, even when they don’t have internet access. This was delivered in a single \"hack week\".', 'Technologies used: ECMAScript 2015+, node.js, Jest, AWS, Bamboo, Elm, React, AngularJS, Webpack, SCSS, RWD, git, Jira, DDD'])
+	},
+		{
+		date: 'Jun 2016 - Apr 2017',
+		post: _List_fromArray(
+			['Lead Software Engineer at Department For Work & Pensions']),
+		threadContent: _List_fromArray(
+			['I was recruited to work on a new application that was intended to replace a number of manual processes for ensuring that Winter Fuels payments are processed quickly and accurately each year.', 'As lead developer on this application, I was responsible for making technology, architecture, and methodology choices, as well as writing code for the application.', 'I introduced Docker for development and deployment (utilising Jenkins for continuous integration), and ensured that the team was doing Test-Driven Development, which I made myself available to advise on when necessary.', 'I was also responsible for supporting and mentoring two less-experienced developers, a role that I have completed a few times over different organisations, and one that I thoroughly enjoy.', 'The application featured an administration view, where users could interact directly with the application’s users/user access levels, and featured a number of interactive forms\n\n        \n            The user was required to select individual claims for Winter Fuels payments, and decide which claimants’ records are accurate and correct, and which one of them have potentially been duplicated thanks to errors when the information was first recorded.', 'I also became a big fan of Functional Programming during this time, and developed the Winter Fuels Matching Service in this manner, which, combined with a completely modular structure, made the codebase incredibly easy to maintain, and ensured changes were very simple.', 'In my short time at DWP, I had multiple requests from the Head of Software Engineering to join other projects to enable them to hit the ground running.', 'Technologies used: ECMAScript 2015+, node.js, Docker, AngularJS, Webpack, SQL, SCSS, RWD, git, Jenkins, Karma, Mocha, Crucible, Jira'])
+	},
+		{
+		date: 'Jan 2016 - May 2016',
+		post: _List_fromArray(
+			['Senior Applications Developer at Nomad Digital']),
+		threadContent: _List_fromArray(
+			['An overhaul of Nomad Digital’s current technology stack and working practices, in which they are moving from a combination of legacy systems, mostly written in Python and Java, to instead use open-source technologies.', 'My responsibilities included aiding the introduction of BDD (behaviour-driven development) into the company, as well as providing support and training to the front-end web development team whilst developing the node.js back-end.', 'After identifying inconsistencies in the existing codebase, I also took charge of simplifying the application’s code in order to ensure its future maintainability, by splitting it up into sensible modules.', 'Technologies used: Java, AngularJS, node.js, Nginx, Docker, Kubernetes, gulp, SCSS, RWD, Git, Jenkins, Cucumber, Gherkin, Karma, Protractor, Crucible, Jira'])
+	},
+		{
+		date: 'Jan 2015 - Dec 2015',
+		post: _List_fromArray(
+			['Technical Design Lead at British Airways - Core Engineering Team']),
+		threadContent: _List_fromArray(
+			['A massive greenfield project bringing British Airways’ web platform up to date with modern development practices and technologies, moving it away from an increasingly difficult-to-maintain legacy platform and creating an MVC architecture in its place. As one of a team of six Technical Design Leads, my responsibilities included:', 'Evaluating and selecting tools/technologies to be included in BA’s new development stack', 'Delivering standards and patterns for the use of selected tools/technologies', 'Supporting, and reviewing code from, five development teams totalling over 70 developers who are developing their first applications under the new architecture', 'Providing and maintaining Yeoman generators for new applications and libraries', 'Delivering a proof of concept application to act as a reference for how to implement the technologies the team is introducing', 'Creation and delivery of documentation and training material to ensure future maintainability of BA\'s codebase', 'Technologies used: AngularJS, node.js, gulp, SCSS, RWD, SVN, Jenkins, Jasmine, Karma, Protractor, Crucible, Jira'])
+	},
+		{
+		date: 'Mar 2013 - Dec 2014',
+		post: _List_fromArray(
+			['Technical Design Lead at British Airways - Mobile ba.com']),
+		threadContent: _List_fromArray(
+			['Investigated, evaluated, and implemented solutions for dealing with key issues including device detection and image optimisation.', 'Lead a team including contractors from three separate companies to deliver a fully responsive mobile booking system which now takes sales upwards of £20m per week.', 'Delivered an additional proof of concept demonstrating the benefits of a mobile-first approach. This influenced senior stakeholders to re-evaluate their strategy and fund a total rebuild of the entire ba.com platform.', 'Technologies used: JavaScript, SCSS, RWD, TeamSite, SVN, Jira'])
+	},
+		{
+		date: 'Mar 2012 - Mar 2013',
+		post: _List_fromArray(
+			['Technical Design Lead at British Airways - ba.com (Information Site)']),
+		threadContent: _List_fromArray(
+			['The first project to be built in Interwoven\'s \'LiveSite\' CMS, requiring standards to be set in its use, as well as investigation into its inner workings.', 'Lead a team of contracted developers to deliver a website that allow BA’s editorial team to maintain using a simple drag-and-drop interface.', 'Technologies used: jQuery, LiveSite, Java, SVN, Maven, SOLR'])
+	},
+		{
+		date: 'Jan 2012 - May 2012',
+		post: _List_fromArray(
+			['Technical Design Lead at British Airways - One Destination']),
+		threadContent: _List_fromArray(
+			['This was BA\'s corporate responsibility website, detailing the many projects BA was involved in to protect the environment.', 'Evaluated technologies for use on this site, designed its architecture, which saw this becoming the first cloud-based website British Airways had ever produced, being hosted on AWS; this has since become a staple for all BA microsites.', 'I delivered a solution that included a content management system, complete with a custom workflow that allowed for moderation and approval of all content prior to publishing, with multiple levels of user privileges', 'I developed a training package alongside this, and delivered it to a team of 30 content editors, and a member of BA\'s board of directors. Additionally, delivered a \'user guides\' microsite for the editorial team.', 'Technologies used: PHP, jQuery, HTML5, CSS3, MySQL, AWS'])
+	},
+		{
+		date: 'Sep 2008 - Jan 2012',
+		post: _List_fromArray(
+			['Software Engineer at British Airways - ba.com']),
+		threadContent: _List_fromArray(
+			['Software Engineer providing innovative solutions and technical consultancy for a web development team that consisted of developers in multiple locations, both in the UK and abroad.', 'Duties included (not exhaustive): Carrying out code reviews, reviewing and approving technical solutions proposed by developers, analysis and production of technical requirements from business requirements, and development and delivery of complex content on the British Airways web portfolio'])
+	}
+	]);
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
+var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
+	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
+		var _v1 = attr.b;
+		var _v2 = _v1.a;
+		return true;
+	} else {
+		return false;
+	}
+};
+var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
+	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
+};
+var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
+	var decode = function (code) {
+		var _v0 = lookup(code);
+		if (_v0.$ === 'Nothing') {
+			return $elm$json$Json$Decode$fail('No key matched');
+		} else {
+			var msg = _v0.a;
+			return $elm$json$Json$Decode$succeed(msg);
+		}
+	};
+	var isKey = A2(
+		$elm$json$Json$Decode$andThen,
+		decode,
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+	return $mdgriffith$elm_ui$Internal$Model$Attr(
+		A2(
+			$elm$html$Html$Events$preventDefaultOn,
+			'keydown',
 			A2(
+				$elm$json$Json$Decode$map,
+				function (fired) {
+					return _Utils_Tuple2(fired, true);
+				},
+				isKey)));
+};
+var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
+var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
+var $mdgriffith$elm_ui$Element$Input$space = ' ';
+var $elm$html$Html$Attributes$tabindex = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'tabIndex',
+		$elm$core$String$fromInt(n));
+};
+var $mdgriffith$elm_ui$Element$Input$button = F2(
+	function (attrs, _v0) {
+		var onPress = _v0.onPress;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$pointer,
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											$elm$html$Html$Attributes$tabindex(0)),
+										function () {
+											if (onPress.$ === 'Nothing') {
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$Attr(
+														$elm$html$Html$Attributes$disabled(true)),
+													attrs);
+											} else {
+												var msg = onPress.a;
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Element$Events$onClick(msg),
+													A2(
+														$elm$core$List$cons,
+														$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+															function (code) {
+																return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(msg) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(msg) : $elm$core$Maybe$Nothing);
+															}),
+														attrs));
+											}
+										}()))))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
+var $author$project$Components$nimmoAvatarSmall = A2($author$project$Components$avatar, 20, 'nimmo.png');
+var $author$project$Components$threadLink = function (msg) {
+	return A2(
+		$mdgriffith$elm_ui$Element$Input$button,
+		_List_fromArray(
+			[$mdgriffith$elm_ui$Element$centerY]),
+		{
+			label: A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(37)),
+						$mdgriffith$elm_ui$Element$spacing(10),
+						$mdgriffith$elm_ui$Element$paddingEach(
+						_Utils_update(
+							$author$project$Components$edges,
+							{top: 16}))
+					]),
+				_List_fromArray(
+					[
+						$author$project$Components$nimmoAvatarSmall,
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$color($author$project$Colours$linkBlue),
+								$mdgriffith$elm_ui$Element$Font$bold,
+								$mdgriffith$elm_ui$Element$Font$size(14)
+							]),
+						$mdgriffith$elm_ui$Element$text('Read more'))
+					])),
+			onPress: $elm$core$Maybe$Just(msg)
+		});
+};
+var $author$project$View$EmploymentHistory$employmentPost = F2(
+	function (openThreadMsg, item) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					$author$project$Components$date(item.date),
+					A2(
+					$author$project$Components$post,
+					item.post,
+					$elm$core$Maybe$Just(
+						$author$project$Components$threadLink(
+							openThreadMsg(
+								{
+									contents: item.threadContent,
+									title: A2(
+										$elm$core$Maybe$withDefault,
+										'',
+										$elm$core$List$head(item.post))
+								}))))
+				]));
+	});
+var $author$project$View$EmploymentHistory$thread = function (_v0) {
+	var title = _v0.title;
+	var contents = _v0.contents;
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$Background$color($author$project$Colours$white)
+			]),
+		_List_fromArray(
+			[
+				$author$project$Components$channelHeading(
+				{description: title, name: 'Thread'}),
+				A2($author$project$Components$post, contents, $elm$core$Maybe$Nothing)
+			]));
+};
+var $author$project$View$EmploymentHistory$view = F2(
+	function (state, _v0) {
+		var openThreadMsg = _v0.openThreadMsg;
+		var closeThreadMsg = _v0.closeThreadMsg;
+		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$inFront(
+					function () {
+						if (state.$ === 'NotDisplayingThread') {
+							return $mdgriffith$elm_ui$Element$none;
+						} else {
+							var content = state.a;
+							return $author$project$View$EmploymentHistory$thread(content);
+						}
+					}())
 				]),
-			_List_fromArray(
-				[
-					$author$project$Components$date('Jun 2020 - Now'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Full-stack engineer at MindGym']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Apr 2019 - Jun 2020'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Tech Lead at Click Travel - Front-End Architecture Team']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Apr 2017 - Apr 2019'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Senior Software Engineer at Click Travel - Pioneer Flights']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Jun 2016 - Apr 2017'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Lead Software Engineer at Department For Work & Pensions']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Jan 2016 - May 2016'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Senior Applications Developer at Nomad Digital']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Jan 2015 - Dec 2015'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Technical Design Lead at British Airways - Core Engineering Team']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Mar 2013 - Dec 2014'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Technical Design Lead at British Airways - Mobile ba.com']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Mar 2012 - Mar 2013'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Technical Design Lead at British Airways - ba.com (Information Site)']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Jan 2012 - May 2012'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Technical Design Lead at British Airways - One Destination']),
-					$elm$core$Maybe$Nothing),
-					$author$project$Components$date('Sep 2008 - Jan 2012'),
-					A2(
-					$author$project$Components$post,
-					_List_fromArray(
-						['Software Engineer at British Airways - ba.com']),
-					$elm$core$Maybe$Nothing)
-				]))
-		]));
+			$elm$core$List$concat(
+				_List_fromArray(
+					[
+						_List_fromArray(
+						[
+							$author$project$Components$channelHeading(
+							{description: 'Information about my employment history. Details in threads.', name: 'Employment History'})
+						]),
+						A2(
+						$elm$core$List$map,
+						$author$project$View$EmploymentHistory$employmentPost(openThreadMsg),
+						$author$project$Content$EmploymentHistory$content)
+					])));
+	});
 var $author$project$View$Homepage$view = A2(
 	$mdgriffith$elm_ui$Element$column,
 	_List_fromArray(
@@ -17927,7 +18192,11 @@ var $author$project$Main$view = function (model) {
 								case 'ViewingHomepage':
 									return $author$project$View$Homepage$view;
 								case 'ViewingEmploymentHistory':
-									return $author$project$View$EmploymentHistory$view;
+									var state = _v1.a;
+									return A2(
+										$author$project$View$EmploymentHistory$view,
+										state,
+										{closeThreadMsg: $author$project$Main$CloseThread, openThreadMsg: $author$project$Main$OpenThread});
 								default:
 									return $author$project$View$Blogs$view;
 							}
@@ -17940,7 +18209,7 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$UrlRequested, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"UrlRequested":["Browser.UrlRequest"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"View.EmploymentHistory.Thread":{"args":[],"type":"{ title : String.String, contents : List.List String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"UrlRequested":["Browser.UrlRequest"],"OpenThread":["View.EmploymentHistory.Thread"],"CloseThread":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 

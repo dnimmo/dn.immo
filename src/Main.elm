@@ -9,7 +9,7 @@ import Html.Events exposing (onClick)
 import Route exposing (Route(..), pushUrl)
 import Url exposing (Url)
 import View.Blogs as Blogs
-import View.EmploymentHistory as EmploymentHistory
+import View.EmploymentHistory as EmploymentHistory exposing (State(..))
 import View.Homepage as Homepage
 
 
@@ -21,7 +21,7 @@ type alias Model =
 
 type State
     = ViewingHomepage
-    | ViewingEmploymentHistory
+    | ViewingEmploymentHistory EmploymentHistory.State
     | ViewingBlogs
     | Error String
 
@@ -29,6 +29,8 @@ type State
 type Msg
     = UrlChanged Url
     | UrlRequested Browser.UrlRequest
+    | OpenThread EmploymentHistory.Thread
+    | CloseThread
 
 
 getStateFromUrl : Url -> State
@@ -43,7 +45,7 @@ getStateFromUrl url =
                     ViewingHomepage
 
                 EmploymentHistory ->
-                    ViewingEmploymentHistory
+                    ViewingEmploymentHistory NotDisplayingThread
 
                 Blogs ->
                     ViewingBlogs
@@ -67,6 +69,22 @@ update msg model =
         UrlRequested (External url) ->
             ( model, Navigation.load url )
 
+        OpenThread thread ->
+            ( { model
+                | state =
+                    ViewingEmploymentHistory <|
+                        DisplayingThread thread
+              }
+            , Cmd.none
+            )
+
+        CloseThread ->
+            ( { model
+                | state = ViewingEmploymentHistory NotDisplayingThread
+              }
+            , Cmd.none
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -81,7 +99,7 @@ channelList =
     ]
 
 
-view : Model -> Browser.Document msg
+view : Model -> Browser.Document Msg
 view model =
     { title = "Nimmo | Newcastle-based software engineer"
     , body =
@@ -97,7 +115,7 @@ view model =
                         ViewingHomepage ->
                             Homepage.slug
 
-                        ViewingEmploymentHistory ->
+                        ViewingEmploymentHistory _ ->
                             EmploymentHistory.slug
 
                         ViewingBlogs ->
@@ -117,8 +135,11 @@ view model =
                     ViewingHomepage ->
                         Homepage.view
 
-                    ViewingEmploymentHistory ->
-                        EmploymentHistory.view
+                    ViewingEmploymentHistory state ->
+                        EmploymentHistory.view state
+                            { openThreadMsg = OpenThread
+                            , closeThreadMsg = CloseThread
+                            }
 
                     ViewingBlogs ->
                         Blogs.view

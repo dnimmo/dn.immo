@@ -5,16 +5,9 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import Element.Region as Region exposing (description)
 import Icons
-
-
-setHeight int =
-    height (fill |> maximum int)
-
-
-setWidth int =
-    width (fill |> maximum int)
 
 
 globalStyles =
@@ -31,10 +24,10 @@ globalStyles =
 statusIndicator =
     el
         [ Border.rounded 50
-        , setHeight 10
-        , setWidth 10
+        , height <| px 10
+        , width <| px 10
         , Background.color Colours.green
-        , alignBottom
+        , alignTop
         ]
         none
 
@@ -126,7 +119,7 @@ menu : Bool -> String -> List String -> Element msg
 menu channelListExpanded activeItem channels =
     column
         [ height fill
-        , setWidth 256
+        , width <| px 256
         , Background.color Colours.darkBlue
         , Font.color Colours.menuWhite
         ]
@@ -210,7 +203,7 @@ date str =
         [ width fill
         , Border.widthEach { edges | bottom = 1 }
         , Border.color Colours.lightGrey
-        , setHeight 13
+        , height <| px 13
         , paddingXY 0 20
         , inFront <|
             el
@@ -231,21 +224,26 @@ date str =
         none
 
 
-avatar : String -> Element msg
-avatar src =
+avatar : Int -> String -> Element msg
+avatar size src =
     el
         [ Border.rounded 20
         , Background.image <|
             "/img/"
                 ++ src
-        , setWidth 37
-        , setHeight 37
+        , width <| px size
+        , height <| px size
+        , alignTop
         ]
         none
 
 
-nimmoAvatar =
-    avatar "nimmo.png"
+nimmoAvatarStandard =
+    avatar 37 "nimmo.png"
+
+
+nimmoAvatarSmall =
+    avatar 20 "nimmo.png"
 
 
 post : List String -> Maybe (Element msg) -> Element msg
@@ -262,11 +260,11 @@ post content maybeFinalElement =
             }
         , Font.size 16
         ]
-        [ nimmoAvatar
+        [ nimmoAvatarStandard
         , column
             [ width fill
             , height fill
-            , spacing 18
+            , spacing 32
             ]
           <|
             [ el [ Font.medium ] <| text "Nimmo"
@@ -286,4 +284,27 @@ externalLink { label, url } =
     link [ Font.color Colours.linkBlue ]
         { label = paragraph [ Font.underline ] [ text label ]
         , url = url
+        }
+
+
+threadLink : msg -> Element msg
+threadLink msg =
+    Input.button [ centerY ]
+        { label =
+            row
+                [ width fill
+                , height <| px 37
+                , spacing 10
+                , paddingEach { edges | top = 16 }
+                ]
+                [ nimmoAvatarSmall
+                , el
+                    [ Font.color Colours.linkBlue
+                    , Font.bold
+                    , Font.size 14
+                    ]
+                  <|
+                    text "Read more"
+                ]
+        , onPress = Just msg
         }

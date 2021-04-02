@@ -9,10 +9,6 @@ slug =
     "blogs"
 
 
-blogLink params =
-    Just <| externalLink params
-
-
 blogPost : BlogContent -> Element msg
 blogPost blog =
     column
@@ -20,7 +16,9 @@ blogPost blog =
         , height fill
         ]
         [ date blog.date
-        , post blog.post <| Just <| externalLink blog.link
+        , post blog.post <|
+            Just <|
+                externalLink blog.link
         ]
 
 
