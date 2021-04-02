@@ -6,6 +6,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Region as Region exposing (description)
+import Icons
 
 
 setHeight int =
@@ -38,14 +39,100 @@ statusIndicator =
         none
 
 
-menu =
+navigationItem : Bool -> String -> Element msg
+navigationItem active slug =
+    link
+        [ Font.size 15
+        , width fill
+        , paddingEach
+            { edges
+                | left = 42
+                , top = 8
+                , bottom = 6
+            }
+        , Background.color <|
+            if active then
+                Colours.lightBlue
+
+            else
+                Colours.darkBlue
+        , Font.color <|
+            if active then
+                Colours.white
+
+            else
+                Colours.menuWhite
+        , mouseOver <|
+            if active then
+                []
+
+            else
+                [ Background.color Colours.navy
+                , Font.color Colours.lightGrey
+                ]
+        ]
+        { url = "/" ++ slug
+        , label =
+            row
+                [ width fill
+                , if active then
+                    Font.bold
+
+                  else
+                    Font.medium
+                , spacing 4
+                , centerY
+                ]
+                [ text "#"
+                , text slug
+                ]
+        }
+
+
+navigation : Bool -> String -> List String -> Element msg
+navigation expanded activeItem slugs =
+    column
+        [ paddingXY 0 20
+        , width fill
+        ]
+        [ row
+            [ height fill
+            , spacing 5
+            , paddingEach { edges | left = 20 }
+            ]
+            [ el [ moveUp 2 ] <|
+                if expanded then
+                    Icons.arrowDown
+
+                else
+                    Icons.arrowRight
+            , el
+                [ Region.heading 2
+                , Font.size 18
+                ]
+              <|
+                text "Channels"
+            ]
+        , column
+            [ width fill
+            , paddingEach { edges | top = 8 }
+            ]
+          <|
+            List.map (\str -> navigationItem (str == activeItem) str) slugs
+        ]
+
+
+menu : Bool -> String -> List String -> Element msg
+menu channelListExpanded activeItem channels =
     column
         [ height fill
         , setWidth 256
         , Background.color Colours.darkBlue
         , Font.color Colours.menuWhite
         ]
-        [ siteHeading ]
+        [ siteHeading
+        , navigation channelListExpanded activeItem channels
+        ]
 
 
 edges =
@@ -110,7 +197,7 @@ channelHeading { name, description } =
             , el [ Font.color Colours.grey ] <|
                 text <|
                     "(# "
-                        ++ String.toLower name
+                        ++ (String.toLower << String.replace " " "-") name
                         ++ ")"
             ]
         , el [ Font.color Colours.grey ] <|
@@ -171,10 +258,9 @@ post content maybeFinalElement =
                 | top = 20
                 , left = 20
                 , right = 20
-                , bottom = 0
+                , bottom = 30
             }
         , Font.size 16
-        , height fill
         ]
         [ nimmoAvatar
         , column

@@ -3,12 +3,20 @@ module Colours exposing (..)
 import Element exposing (rgb255, rgba255)
 
 
+lightBlue =
+    rgb255 17 100 163
+
+
 mediumBlue =
     rgb255 82 38 83
 
 
 darkBlue =
     rgb255 63 14 64
+
+
+navy =
+    rgb255 53 13 54
 
 
 linkBlue =
@@ -20,7 +28,7 @@ white =
 
 
 menuWhite =
-    rgba255 255 255 255 0.8
+    rgba255 255 255 255 0.6
 
 
 green =
@@ -33,3 +41,7 @@ grey =
 
 lightGrey =
     rgb255 216 216 216
+
+
+mediumGrey =
+    rgb255 207 195 207

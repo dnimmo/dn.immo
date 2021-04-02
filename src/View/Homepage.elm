@@ -4,6 +4,11 @@ import Components exposing (channelHeading, date, externalLink, post)
 import Element exposing (..)
 
 
+slug =
+    "general"
+
+
+view : Element msg
 view =
     column
         [ height fill
