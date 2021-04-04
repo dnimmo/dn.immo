@@ -238,16 +238,21 @@ avatar size src =
         none
 
 
+standardAvatar : String -> Element msg
+standardAvatar =
+    avatar 37
+
+
 nimmoAvatarStandard =
-    avatar 37 "nimmo.png"
+    standardAvatar "nimmo.png"
 
 
 nimmoAvatarSmall =
     avatar 20 "nimmo.png"
 
 
-post : List String -> Maybe (Element msg) -> Element msg
-post content maybeFinalElement =
+postItem : Element msg -> List String -> String -> Maybe (Element msg) -> Element msg
+postItem avatarElement content name maybeFinalElement =
     row
         [ width fill
         , spacing 20
@@ -260,14 +265,14 @@ post content maybeFinalElement =
             }
         , Font.size 16
         ]
-        [ nimmoAvatarStandard
+        [ avatarElement
         , column
             [ width fill
             , height fill
             , spacing 32
             ]
           <|
-            [ el [ Font.medium ] <| text "Nimmo"
+            [ el [ Font.medium ] <| text name
             ]
                 ++ List.map (\str -> paragraph [ spacing 10 ] [ text str ]) content
                 ++ (case maybeFinalElement of
@@ -278,6 +283,16 @@ post content maybeFinalElement =
                             [ none ]
                    )
         ]
+
+
+post : List String -> String -> Maybe (Element msg) -> Element msg
+post =
+    postItem nimmoAvatarStandard
+
+
+nonNimmoPost : Element msg -> List String -> String -> Maybe (Element msg) -> Element msg
+nonNimmoPost avatarElement =
+    postItem avatarElement
 
 
 externalLink { label, url } =

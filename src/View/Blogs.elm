@@ -16,7 +16,7 @@ blogPost blog =
         , height fill
         ]
         [ date blog.date
-        , post blog.post <|
+        , post blog.post "Nimmo" <|
             Just <|
                 externalLink blog.link
         ]

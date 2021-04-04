@@ -22,6 +22,7 @@ projectPost project =
             (project.name
                 :: project.details
             )
+            "Nimmo"
           <|
             Just <|
                 externalLink project.link

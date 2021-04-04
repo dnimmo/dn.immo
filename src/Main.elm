@@ -13,6 +13,7 @@ import View.Blogs as Blogs
 import View.EmploymentHistory as EmploymentHistory exposing (State(..))
 import View.Homepage as Homepage
 import View.Projects as Projects
+import View.Recommendations as Recommendations
 import Viewport exposing (Viewport, ViewportDetails, classify)
 
 
@@ -28,6 +29,7 @@ type State
     | ViewingEmploymentHistory EmploymentHistory.State
     | ViewingBlogs
     | ViewingProjects
+    | ViewingRecommendations
     | Error String
 
 
@@ -59,8 +61,8 @@ getStateFromUrl url =
                 Projects ->
                     ViewingProjects
 
-                _ ->
-                    Error "Not done yet"
+                Recommendations ->
+                    ViewingRecommendations
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -137,6 +139,9 @@ view model =
 
                         ViewingProjects ->
                             Projects.slug
+
+                        ViewingRecommendations ->
+                            Recommendations.slug
                     )
                     channelList
                 , case model.state of
@@ -163,6 +168,9 @@ view model =
 
                     ViewingProjects ->
                         Projects.view
+
+                    ViewingRecommendations ->
+                        Recommendations.view
                 ]
         ]
     }

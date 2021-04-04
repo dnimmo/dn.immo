@@ -7,6 +7,7 @@ import View.Blogs as Blogs
 import View.EmploymentHistory as EmploymentHistory
 import View.Homepage as Homepage
 import View.Projects as Projects
+import View.Recommendations as Recommendations
 
 
 type Route
@@ -25,6 +26,7 @@ parser =
         , Parser.map EmploymentHistory (s EmploymentHistory.slug)
         , Parser.map Blogs (s Blogs.slug)
         , Parser.map Projects (s Projects.slug)
+        , Parser.map Recommendations (s Recommendations.slug)
         ]
 
 
@@ -48,8 +50,8 @@ toString route =
         Projects ->
             Projects.slug
 
-        _ ->
-            "error"
+        Recommendations ->
+            Recommendations.slug
 
 
 pushUrl : Navigation.Key -> Route -> Cmd msg

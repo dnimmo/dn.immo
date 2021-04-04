@@ -31,7 +31,7 @@ employmentPost openThreadMsg item =
         , height fill
         ]
         [ date item.date
-        , post item.post <|
+        , post item.post "Nimmo" <|
             Just <|
                 threadLink <|
                     openThreadMsg
@@ -73,7 +73,7 @@ thread closeMsg viewport { title, contents } =
               <|
                 closeButton closeMsg
             ]
-        , post contents Nothing
+        , post contents "Nimmo" Nothing
         ]
 
 
