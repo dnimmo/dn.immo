@@ -144,33 +144,39 @@ view model =
                             Recommendations.slug
                     )
                     channelList
-                , case model.state of
-                    Error message ->
-                        el
-                            [ centerX
-                            , alignTop
-                            , padding 40
-                            ]
-                        <|
-                            text message
+                , el
+                    [ scrollbarY
+                    , width fill
+                    , height fill
+                    ]
+                  <|
+                    case model.state of
+                        Error message ->
+                            el
+                                [ centerX
+                                , alignTop
+                                , padding 40
+                                ]
+                            <|
+                                text message
 
-                    ViewingHomepage ->
-                        Homepage.view
+                        ViewingHomepage ->
+                            Homepage.view
 
-                    ViewingEmploymentHistory state ->
-                        EmploymentHistory.view state
-                            { openThreadMsg = OpenThread
-                            , closeThreadMsg = CloseThread
-                            }
+                        ViewingEmploymentHistory state ->
+                            EmploymentHistory.view state
+                                { openThreadMsg = OpenThread
+                                , closeThreadMsg = CloseThread
+                                }
 
-                    ViewingBlogs ->
-                        Blogs.view
+                        ViewingBlogs ->
+                            Blogs.view
 
-                    ViewingProjects ->
-                        Projects.view
+                        ViewingProjects ->
+                            Projects.view
 
-                    ViewingRecommendations ->
-                        Recommendations.view
+                        ViewingRecommendations ->
+                            Recommendations.view
                 ]
         ]
     }
