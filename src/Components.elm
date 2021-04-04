@@ -281,8 +281,12 @@ post content maybeFinalElement =
 
 
 externalLink { label, url } =
-    link [ Font.color Colours.linkBlue ]
-        { label = paragraph [ Font.underline ] [ text label ]
+    newTabLink [ Font.color Colours.linkBlue ]
+        { label =
+            row [ spacing 10 ]
+                [ paragraph [ Font.underline ] [ text label ]
+                , el [ width <| px 20 ] Icons.externalLink
+                ]
         , url = url
         }
 

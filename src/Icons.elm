@@ -1,7 +1,7 @@
 module Icons exposing (..)
 
 import Element exposing (el, html, rotate)
-import Material.Icons exposing (chevron_right, clear)
+import Material.Icons exposing (chevron_right, clear, open_in_new)
 import Material.Icons.Types exposing (Coloring(..), Icon)
 
 
@@ -15,3 +15,7 @@ arrowDown =
 
 close =
     html <| clear 20 Inherit
+
+
+externalLink =
+    html <| open_in_new 18 Inherit
