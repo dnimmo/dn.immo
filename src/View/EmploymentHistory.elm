@@ -52,6 +52,12 @@ thread closeMsg viewport { title, contents } =
         , alignRight
         , Border.widthEach { edges | left = 1 }
         , Border.color Colours.mediumGrey
+        , Border.shadow
+            { blur = 1000
+            , color = Colours.shadow
+            , offset = ( 0, 0 )
+            , size = 1000
+            }
         , case viewport of
             Narrow _ ->
                 width fill

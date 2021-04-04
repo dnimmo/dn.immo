@@ -14,7 +14,7 @@ import View.EmploymentHistory as EmploymentHistory exposing (State(..))
 import View.Homepage as Homepage
 import View.Projects as Projects
 import View.Recommendations as Recommendations
-import Viewport exposing (Viewport, ViewportDetails, classify)
+import Viewport exposing (Viewport(..), ViewportDetails, classify)
 
 
 type alias Model =
@@ -123,27 +123,32 @@ view model =
             globalStyles
           <|
             mainLayout
-                [ menu False
-                    (case model.state of
-                        Error _ ->
-                            ""
+                [ case model.viewport of
+                    Narrow _ ->
+                        none
 
-                        ViewingHomepage ->
-                            Homepage.slug
+                    Medium _ ->
+                        menu
+                            (case model.state of
+                                Error _ ->
+                                    ""
 
-                        ViewingEmploymentHistory _ ->
-                            EmploymentHistory.slug
+                                ViewingHomepage ->
+                                    Homepage.slug
 
-                        ViewingBlogs ->
-                            Blogs.slug
+                                ViewingEmploymentHistory _ ->
+                                    EmploymentHistory.slug
 
-                        ViewingProjects ->
-                            Projects.slug
+                                ViewingBlogs ->
+                                    Blogs.slug
 
-                        ViewingRecommendations ->
-                            Recommendations.slug
-                    )
-                    channelList
+                                ViewingProjects ->
+                                    Projects.slug
+
+                                ViewingRecommendations ->
+                                    Recommendations.slug
+                            )
+                            channelList
                 , el
                     [ scrollbarY
                     , width fill

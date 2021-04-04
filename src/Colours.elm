@@ -45,3 +45,7 @@ lightGrey =
 
 mediumGrey =
     rgb255 207 195 207
+
+
+shadow =
+    rgba255 0 0 0 0.7

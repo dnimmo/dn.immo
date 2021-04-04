@@ -82,8 +82,8 @@ navigationItem active slug =
         }
 
 
-navigation : Bool -> String -> List String -> Element msg
-navigation expanded activeItem slugs =
+navigation : String -> List String -> Element msg
+navigation activeItem slugs =
     column
         [ paddingXY 0 20
         , width fill
@@ -93,12 +93,8 @@ navigation expanded activeItem slugs =
             , spacing 5
             , paddingEach { edges | left = 20 }
             ]
-            [ el [ moveUp 2 ] <|
-                if expanded then
-                    Icons.arrowDown
-
-                else
-                    Icons.arrowRight
+            [ el [ moveUp 2 ]
+                Icons.arrowDown
             , el
                 [ Region.heading 2
                 , Font.size 18
@@ -115,8 +111,8 @@ navigation expanded activeItem slugs =
         ]
 
 
-menu : Bool -> String -> List String -> Element msg
-menu channelListExpanded activeItem channels =
+menu : String -> List String -> Element msg
+menu activeItem channels =
     column
         [ height fill
         , width <| px 256
@@ -124,7 +120,7 @@ menu channelListExpanded activeItem channels =
         , Font.color Colours.menuWhite
         ]
         [ siteHeading
-        , navigation channelListExpanded activeItem channels
+        , navigation activeItem channels
         ]
 
 
