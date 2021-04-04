@@ -14,11 +14,18 @@
     const app =
       Elm.Main.init({
         node: document.getElementById('root'),
+        flags: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
       })
 
-    // window.addEventListener('resize', function () {
-    //   app.ports.viewportSizeChanged.send({ width: window.innerWidth, height: window.innerHeight })
-    // })
+    window.addEventListener('resize', function () {
+      app.ports.viewportSizeChanged.send({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    })
 
   </script>
 </body>

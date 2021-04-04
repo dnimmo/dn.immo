@@ -6,6 +6,7 @@ import Url.Parser as Parser exposing (Parser, oneOf, s)
 import View.Blogs as Blogs
 import View.EmploymentHistory as EmploymentHistory
 import View.Homepage as Homepage
+import View.Projects as Projects
 
 
 type Route
@@ -23,6 +24,7 @@ parser =
         , Parser.map General (s Homepage.slug)
         , Parser.map EmploymentHistory (s EmploymentHistory.slug)
         , Parser.map Blogs (s Blogs.slug)
+        , Parser.map Projects (s Projects.slug)
         ]
 
 
@@ -42,6 +44,9 @@ toString route =
 
         Blogs ->
             Blogs.slug
+
+        Projects ->
+            Projects.slug
 
         _ ->
             "error"

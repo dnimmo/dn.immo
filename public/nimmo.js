@@ -80,271 +80,6 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 console.warn('Compiled in DEBUG mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
-// EQUALITY
-
-function _Utils_eq(x, y)
-{
-	for (
-		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
-		isEqual && (pair = stack.pop());
-		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
-		)
-	{}
-
-	return isEqual;
-}
-
-function _Utils_eqHelp(x, y, depth, stack)
-{
-	if (x === y)
-	{
-		return true;
-	}
-
-	if (typeof x !== 'object' || x === null || y === null)
-	{
-		typeof x === 'function' && _Debug_crash(5);
-		return false;
-	}
-
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
-	/**/
-	if (x.$ === 'Set_elm_builtin')
-	{
-		x = $elm$core$Set$toList(x);
-		y = $elm$core$Set$toList(y);
-	}
-	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	/**_UNUSED/
-	if (x.$ < 0)
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	for (var key in x)
-	{
-		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-var _Utils_equal = F2(_Utils_eq);
-var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
-
-
-
-// COMPARISONS
-
-// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
-// the particular integer values assigned to LT, EQ, and GT.
-
-function _Utils_cmp(x, y, ord)
-{
-	if (typeof x !== 'object')
-	{
-		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
-	}
-
-	/**/
-	if (x instanceof String)
-	{
-		var a = x.valueOf();
-		var b = y.valueOf();
-		return a === b ? 0 : a < b ? -1 : 1;
-	}
-	//*/
-
-	/**_UNUSED/
-	if (typeof x.$ === 'undefined')
-	//*/
-	/**/
-	if (x.$[0] === '#')
-	//*/
-	{
-		return (ord = _Utils_cmp(x.a, y.a))
-			? ord
-			: (ord = _Utils_cmp(x.b, y.b))
-				? ord
-				: _Utils_cmp(x.c, y.c);
-	}
-
-	// traverse conses until end of a list or a mismatch
-	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
-	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
-}
-
-var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
-var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
-var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
-var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
-
-var _Utils_compare = F2(function(x, y)
-{
-	var n = _Utils_cmp(x, y);
-	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
-});
-
-
-// COMMON VALUES
-
-var _Utils_Tuple0_UNUSED = 0;
-var _Utils_Tuple0 = { $: '#0' };
-
-function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
-
-function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
-
-function _Utils_chr_UNUSED(c) { return c; }
-function _Utils_chr(c) { return new String(c); }
-
-
-// RECORDS
-
-function _Utils_update(oldRecord, updatedFields)
-{
-	var newRecord = {};
-
-	for (var key in oldRecord)
-	{
-		newRecord[key] = oldRecord[key];
-	}
-
-	for (var key in updatedFields)
-	{
-		newRecord[key] = updatedFields[key];
-	}
-
-	return newRecord;
-}
-
-
-// APPEND
-
-var _Utils_append = F2(_Utils_ap);
-
-function _Utils_ap(xs, ys)
-{
-	// append Strings
-	if (typeof xs === 'string')
-	{
-		return xs + ys;
-	}
-
-	// append Lists
-	if (!xs.b)
-	{
-		return ys;
-	}
-	var root = _List_Cons(xs.a, ys);
-	xs = xs.b
-	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		curr = curr.b = _List_Cons(xs.a, ys);
-	}
-	return root;
-}
-
-
-
-var _List_Nil_UNUSED = { $: 0 };
-var _List_Nil = { $: '[]' };
-
-function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
-
-
-var _List_cons = F2(_List_Cons);
-
-function _List_fromArray(arr)
-{
-	var out = _List_Nil;
-	for (var i = arr.length; i--; )
-	{
-		out = _List_Cons(arr[i], out);
-	}
-	return out;
-}
-
-function _List_toArray(xs)
-{
-	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		out.push(xs.a);
-	}
-	return out;
-}
-
-var _List_map2 = F3(function(f, xs, ys)
-{
-	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
-	{
-		arr.push(A2(f, xs.a, ys.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map3 = F4(function(f, xs, ys, zs)
-{
-	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A3(f, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map4 = F5(function(f, ws, xs, ys, zs)
-{
-	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
-{
-	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_sortBy = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		return _Utils_cmp(f(a), f(b));
-	}));
-});
-
-var _List_sortWith = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		var ord = A2(f, a, b);
-		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
-	}));
-});
-
-
-
 var _JsArray_empty = [];
 
 function _JsArray_singleton(value)
@@ -790,6 +525,271 @@ function _Debug_regionToString(region)
 	}
 	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
+
+
+
+// EQUALITY
+
+function _Utils_eq(x, y)
+{
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = $elm$core$Set$toList(x);
+		y = $elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**_UNUSED/
+	if (x.$ < 0)
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**_UNUSED/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
+});
+
+
+// COMMON VALUES
+
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
+
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
+
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
+
+
+// RECORDS
+
+function _Utils_update(oldRecord, updatedFields)
+{
+	var newRecord = {};
+
+	for (var key in oldRecord)
+	{
+		newRecord[key] = oldRecord[key];
+	}
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
+}
+
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
+{
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
+}
+
+
+
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
+
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
+{
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
+}
+
+function _List_toArray(xs)
+{
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
+}
+
+var _List_map2 = F3(function(f, xs, ys)
+{
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map3 = F4(function(f, xs, ys, zs)
+{
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
+	}));
+});
 
 
 
@@ -4962,10 +4962,31 @@ function _Url_percentDecode(string)
 var $author$project$Main$UrlRequested = function (a) {
 	return {$: 'UrlRequested', a: a};
 };
-var $elm$core$Basics$EQ = {$: 'EQ'};
-var $elm$core$Basics$GT = {$: 'GT'};
-var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
+var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var $elm$core$Array$foldr = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
+			});
+		return A3(
+			$elm$core$Elm$JsArray$foldr,
+			helper,
+			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
+	});
+var $elm$core$Array$toList = function (array) {
+	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+};
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
@@ -5018,30 +5039,9 @@ var $elm$core$Set$toList = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
-var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
-var $elm$core$Array$foldr = F3(
-	function (func, baseCase, _v0) {
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var helper = F2(
-			function (node, acc) {
-				if (node.$ === 'SubTree') {
-					var subTree = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
-				} else {
-					var values = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
-				}
-			});
-		return A3(
-			$elm$core$Elm$JsArray$foldr,
-			helper,
-			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
-			tree);
-	});
-var $elm$core$Array$toList = function (array) {
-	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
-};
+var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5437,6 +5437,7 @@ var $elm$core$Result$isOk = function (result) {
 		return false;
 	}
 };
+var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$map = _Json_map1;
 var $elm$json$Json$Decode$map2 = _Json_map2;
 var $elm$json$Json$Decode$succeed = _Json_succeed;
@@ -10560,6 +10561,15 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$application = _Browser_application;
+var $author$project$Viewport$Medium = function (a) {
+	return {$: 'Medium', a: a};
+};
+var $author$project$Viewport$Narrow = function (a) {
+	return {$: 'Narrow', a: a};
+};
+var $author$project$Viewport$classify = function (details) {
+	return (details.width < 700) ? $author$project$Viewport$Narrow(details) : $author$project$Viewport$Medium(details);
+};
 var $author$project$Main$Error = function (a) {
 	return {$: 'Error', a: a};
 };
@@ -10569,6 +10579,7 @@ var $author$project$Main$ViewingEmploymentHistory = function (a) {
 	return {$: 'ViewingEmploymentHistory', a: a};
 };
 var $author$project$Main$ViewingHomepage = {$: 'ViewingHomepage'};
+var $author$project$Main$ViewingProjects = {$: 'ViewingProjects'};
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
 		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
@@ -10691,6 +10702,7 @@ var $elm$url$Url$Parser$parse = F2(
 var $author$project$Route$Blogs = {$: 'Blogs'};
 var $author$project$Route$EmploymentHistory = {$: 'EmploymentHistory'};
 var $author$project$Route$General = {$: 'General'};
+var $author$project$Route$Projects = {$: 'Projects'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
@@ -10767,6 +10779,7 @@ var $elm$url$Url$Parser$s = function (str) {
 var $author$project$View$Blogs$slug = 'blogs';
 var $author$project$View$EmploymentHistory$slug = 'employment-history';
 var $author$project$View$Homepage$slug = 'general';
+var $author$project$View$Projects$slug = 'projects';
 var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
 	function (state) {
 		return _List_fromArray(
@@ -10787,7 +10800,11 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Blogs,
-			$elm$url$Url$Parser$s($author$project$View$Blogs$slug))
+			$elm$url$Url$Parser$s($author$project$View$Blogs$slug)),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Projects,
+			$elm$url$Url$Parser$s($author$project$View$Projects$slug))
 		]));
 var $author$project$Route$fromUrl = function (url) {
 	return A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url);
@@ -10805,28 +10822,47 @@ var $author$project$Main$getStateFromUrl = function (url) {
 				return $author$project$Main$ViewingEmploymentHistory($author$project$View$EmploymentHistory$NotDisplayingThread);
 			case 'Blogs':
 				return $author$project$Main$ViewingBlogs;
+			case 'Projects':
+				return $author$project$Main$ViewingProjects;
 			default:
 				return $author$project$Main$Error('Not done yet');
 		}
 	}
 };
 var $author$project$Main$init = F3(
-	function (_v0, url, key) {
+	function (viewportDetails, url, key) {
 		return _Utils_Tuple2(
 			{
 				navKey: key,
-				state: $author$project$Main$getStateFromUrl(url)
+				state: $author$project$Main$getStateFromUrl(url),
+				viewport: $author$project$Viewport$classify(viewportDetails)
 			},
 			$elm$core$Platform$Cmd$none);
 	});
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$ViewportChanged = function (a) {
+	return {$: 'ViewportChanged', a: a};
+};
+var $author$project$Ports$Viewport$viewportSizeChanged = _Platform_incomingPort(
+	'viewportSizeChanged',
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (width) {
+			return A2(
+				$elm$json$Json$Decode$andThen,
+				function (height) {
+					return $elm$json$Json$Decode$succeed(
+						{height: height, width: width});
+				},
+				A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
+		},
+		A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int)));
 var $author$project$Main$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
+	return $author$project$Ports$Viewport$viewportSizeChanged($author$project$Main$ViewportChanged);
 };
-var $author$project$View$EmploymentHistory$DisplayingThread = function (a) {
-	return {$: 'DisplayingThread', a: a};
-};
+var $author$project$View$EmploymentHistory$DisplayingThread = F2(
+	function (a, b) {
+		return {$: 'DisplayingThread', a: a, b: b};
+	});
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $author$project$Route$toString = function (route) {
@@ -10837,6 +10873,8 @@ var $author$project$Route$toString = function (route) {
 			return $author$project$View$EmploymentHistory$slug;
 		case 'Blogs':
 			return $author$project$View$Blogs$slug;
+		case 'Projects':
+			return $author$project$View$Projects$slug;
 		default:
 			return 'error';
 	}
@@ -10851,6 +10889,15 @@ var $author$project$Route$pushUrl = F2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
+			case 'ViewportChanged':
+				var details = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							viewport: $author$project$Viewport$classify(details)
+						}),
+					$elm$core$Platform$Cmd$none);
 			case 'UrlRequested':
 				if (msg.a.$ === 'Internal') {
 					var url = msg.a.a;
@@ -10880,7 +10927,7 @@ var $author$project$Main$update = F2(
 						model,
 						{
 							state: $author$project$Main$ViewingEmploymentHistory(
-								$author$project$View$EmploymentHistory$DisplayingThread(thread))
+								A2($author$project$View$EmploymentHistory$DisplayingThread, model.viewport, thread))
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'CloseThread':
@@ -17883,7 +17930,6 @@ var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
 	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
 };
 var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
-var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
 	return {$: 'MayPreventDefault', a: a};
@@ -18047,24 +18093,116 @@ var $author$project$View$EmploymentHistory$employmentPost = F2(
 								}))))
 				]));
 	});
-var $author$project$View$EmploymentHistory$thread = function (_v0) {
-	var title = _v0.title;
-	var contents = _v0.contents;
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $icidasset$elm_material_icons$Material$Icons$clear = A2(
+	$icidasset$elm_material_icons$Material$Icons$Internal$icon,
+	_List_fromArray(
+		[
+			$icidasset$elm_material_icons$Material$Icons$Internal$v('0 0 24 24')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$icidasset$elm_material_icons$Material$Icons$Internal$p,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M0 0h24v24H0z'),
+					$icidasset$elm_material_icons$Material$Icons$Internal$f('none')
+				]),
+			_List_Nil),
+			A2(
+			$icidasset$elm_material_icons$Material$Icons$Internal$p,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z')
+				]),
+			_List_Nil)
+		]));
+var $author$project$Icons$close = $mdgriffith$elm_ui$Element$html(
+	A2($icidasset$elm_material_icons$Material$Icons$clear, 20, $icidasset$elm_material_icons$Material$Icons$Types$Inherit));
+var $author$project$Components$closeButton = function (msg) {
 	return A2(
-		$mdgriffith$elm_ui$Element$column,
+		$mdgriffith$elm_ui$Element$Input$button,
 		_List_fromArray(
 			[
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$Background$color($author$project$Colours$white)
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 			]),
-		_List_fromArray(
-			[
-				$author$project$Components$channelHeading(
-				{description: title, name: 'Thread'}),
-				A2($author$project$Components$post, contents, $elm$core$Maybe$Nothing)
-			]));
+		{
+			label: A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+				$author$project$Icons$close),
+			onPress: $elm$core$Maybe$Just(msg)
+		});
 };
+var $mdgriffith$elm_ui$Internal$Model$Max = F2(
+	function (a, b) {
+		return {$: 'Max', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$maximum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
+	});
+var $author$project$Colours$mediumGrey = A3($mdgriffith$elm_ui$Element$rgb255, 207, 195, 207);
+var $author$project$View$EmploymentHistory$thread = F3(
+	function (closeMsg, viewport, _v0) {
+		var title = _v0.title;
+		var contents = _v0.contents;
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($author$project$Colours$white),
+					$mdgriffith$elm_ui$Element$alignRight,
+					$mdgriffith$elm_ui$Element$Border$widthEach(
+					_Utils_update(
+						$author$project$Components$edges,
+						{left: 1})),
+					$mdgriffith$elm_ui$Element$Border$color($author$project$Colours$mediumGrey),
+					function () {
+					if (viewport.$ === 'Narrow') {
+						return $mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill);
+					} else {
+						var details = viewport.a;
+						return $mdgriffith$elm_ui$Element$width(
+							A2($mdgriffith$elm_ui$Element$maximum, details.width - 400, $mdgriffith$elm_ui$Element$fill));
+					}
+				}()
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							$author$project$Components$channelHeading(
+							{description: title, name: 'Thread'}),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Border$widthEach(
+									_Utils_update(
+										$author$project$Components$edges,
+										{bottom: 1})),
+									$mdgriffith$elm_ui$Element$Border$color($author$project$Colours$mediumGrey),
+									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$px(40))
+								]),
+							$author$project$Components$closeButton(closeMsg))
+						])),
+					A2($author$project$Components$post, contents, $elm$core$Maybe$Nothing)
+				]));
+	});
 var $author$project$View$EmploymentHistory$view = F2(
 	function (state, _v0) {
 		var openThreadMsg = _v0.openThreadMsg;
@@ -18080,8 +18218,9 @@ var $author$project$View$EmploymentHistory$view = F2(
 						if (state.$ === 'NotDisplayingThread') {
 							return $mdgriffith$elm_ui$Element$none;
 						} else {
-							var content = state.a;
-							return $author$project$View$EmploymentHistory$thread(content);
+							var viewport = state.a;
+							var content = state.b;
+							return A3($author$project$View$EmploymentHistory$thread, closeThreadMsg, viewport, content);
 						}
 					}())
 				]),
@@ -18148,6 +18287,114 @@ var $author$project$View$Homepage$view = A2(
 							{label: 'Pictures of things really close up on Instagram', url: 'https://www.instagram.com/nimmo_pics/'})))
 				]))
 		]));
+var $author$project$Content$Projects$content = _List_fromArray(
+	[
+		{
+		date: 'Apr 4th, 2021',
+		details: _List_fromArray(
+			['The site you\'re looking at right now. I\'ve written this in a few different technologies now, but I decided that I\'d rather maintain it in Elm than JavaScript, so re-wrote it again.']),
+		link: {label: 'dn.immo', url: 'https://github.com/dnimmo/dn.immo'},
+		name: 'My CV, in Elm'
+	},
+		{
+		date: 'Dec 26th, 2020',
+		details: _List_fromArray(
+			['I think retros are really important for building great teams, but running retros remotely always seemed to be a bit awkward. I decided to build my own application for them instead, and we\'ve been successfully using it at MindGym for retros since.']),
+		link: {label: 'BestRetro.app', url: 'https://bestretro.app/'},
+		name: 'BestRetro.app'
+	},
+		{
+		date: 'Jun 19th, 2020',
+		details: _List_fromArray(
+			['I find it\'s useful to re-write an application I\'m already familiar with when I\'m looking to evaluate a new technology, since it helps me focus entirely on the technology being evaluated, rather than the thing I\'m building.', 'Project Arklay is a text-adventure game that I originally wrote to investigate Angular 1.0, and have since re-written multiple times. This example was written using Vue, and is the version that is currently live on projectarklay.com']),
+		link: {label: 'Project Arklay: Vue', url: 'https://github.com/dnimmo/project-arklay-vue'},
+		name: 'Project Arklay, in Vue.js'
+	},
+		{
+		date: 'May 26th, 2020',
+		details: _List_fromArray(
+			['The site you\'re looking at right now, but built with Vue.js']),
+		link: {label: 'David Nimmo\'s CV site (Vue)', url: 'https://github.com/dnimmo/dnimmo.info-vue'},
+		name: 'My CV, in Vue.js'
+	},
+		{
+		date: 'May 13th, 2020',
+		details: _List_fromArray(
+			['The site you\'re looking at right now, but built with React']),
+		link: {label: 'David Nimmo\'s CV site (React)', url: 'https://github.com/dnimmo/loose-client'},
+		name: 'My CV, in React'
+	},
+		{
+		date: 'May 11th, 2020',
+		details: _List_fromArray(
+			['After having written this application a number of times, I decided it was time to create an API for it! This is served through AWS\' API Gateway, which calls AWS Lambda functions. This is the reason it exposes \"handler\" functions, as this is in line with AWS Lambda\'s specification.']),
+		link: {label: 'Project Arklay: Server-side code.', url: 'https://github.com/dnimmo/arklay-server'},
+		name: 'The server-side code for \"Project Arklay\", in TypeScript'
+	},
+		{
+		date: 'May 11th, 2020',
+		details: _List_fromArray(
+			['I recreated this in order to evaluate whether I would still choose Elm over React in 2020. If you\'re interested in the answer, it\'s \"yes\", although I will happily admit that React has come a long way over the last couple of years, and this codebase ended up being a lot of fun to work on.']),
+		link: {label: 'Project Arklay: React + TypeScript', url: 'https://github.com/dnimmo/arklay-cv-client'},
+		name: '\"Project Arklay\", in React.js'
+	},
+		{
+		date: 'Nov 18th, 2019',
+		details: _List_fromArray(
+			['My favourite project, written in my favourite programming language. If you\'ve looked at the rest of my work you\'ll have seen this project a few times, but this version is still by far the most fun I\'ve ever had on a project!']),
+		link: {label: 'Project Arklay: Elm', url: 'https://github.com/dnimmo/project-arklay-v3'},
+		name: '\"Project Arklay\", in Elm'
+	},
+		{
+		date: 'Oct 9th, 2018',
+		details: _List_fromArray(
+			['This was an example of a small piece of functionality accompanying my short blog series \"State-driven development for user interfaces\", which demonstrated how much better you\'re able to think about your front-end codebase once you think about them as finite state machines rather than a collection of pages.']),
+		link: {label: 'State machine example: Elm', url: 'https://github.com/dnimmo/elm-state-machine-example'},
+		name: 'State Machine Example, in Elm'
+	},
+		{
+		date: 'Jan 29th, 2018',
+		details: _List_fromArray(
+			['The original React-based state machine example that is discussed in my short blog series \"State-driven development for user interfaces\"']),
+		link: {label: 'State machine example: React', url: 'https://github.com/dnimmo/state-machine-example'},
+		name: 'State Machine Example, in React'
+	}
+	]);
+var $author$project$View$Projects$projectPost = function (project) {
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+			]),
+		_List_fromArray(
+			[
+				$author$project$Components$date(project.date),
+				A2(
+				$author$project$Components$post,
+				A2($elm$core$List$cons, project.name, project.details),
+				$elm$core$Maybe$Just(
+					$author$project$Components$externalLink(project.link)))
+			]));
+};
+var $author$project$View$Projects$view = A2(
+	$mdgriffith$elm_ui$Element$column,
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+			$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+		]),
+	$elm$core$List$concat(
+		_List_fromArray(
+			[
+				_List_fromArray(
+				[
+					$author$project$Components$channelHeading(
+					{description: 'A collection of projects that I\'ve worked on when the mood has taken me', name: 'Projects'})
+				]),
+				A2($elm$core$List$map, $author$project$View$Projects$projectPost, $author$project$Content$Projects$content)
+			])));
 var $author$project$Main$view = function (model) {
 	return {
 		body: _List_fromArray(
@@ -18170,8 +18417,10 @@ var $author$project$Main$view = function (model) {
 										return $author$project$View$Homepage$slug;
 									case 'ViewingEmploymentHistory':
 										return $author$project$View$EmploymentHistory$slug;
-									default:
+									case 'ViewingBlogs':
 										return $author$project$View$Blogs$slug;
+									default:
+										return $author$project$View$Projects$slug;
 								}
 							}(),
 							$author$project$Main$channelList),
@@ -18197,8 +18446,10 @@ var $author$project$Main$view = function (model) {
 										$author$project$View$EmploymentHistory$view,
 										state,
 										{closeThreadMsg: $author$project$Main$CloseThread, openThreadMsg: $author$project$Main$OpenThread});
-								default:
+								case 'ViewingBlogs':
 									return $author$project$View$Blogs$view;
+								default:
+									return $author$project$View$Projects$view;
 							}
 						}()
 						])))
@@ -18209,7 +18460,18 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$UrlRequested, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"View.EmploymentHistory.Thread":{"args":[],"type":"{ title : String.String, contents : List.List String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"UrlRequested":["Browser.UrlRequest"],"OpenThread":["View.EmploymentHistory.Thread"],"CloseThread":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (width) {
+			return A2(
+				$elm$json$Json$Decode$andThen,
+				function (height) {
+					return $elm$json$Json$Decode$succeed(
+						{height: height, width: width});
+				},
+				A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
+		},
+		A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int)))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"View.EmploymentHistory.Thread":{"args":[],"type":"{ title : String.String, contents : List.List String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Viewport.ViewportDetails":{"args":[],"type":"{ height : Basics.Int, width : Basics.Int }"}},"unions":{"Main.Msg":{"args":[],"tags":{"ViewportChanged":["Viewport.ViewportDetails"],"UrlChanged":["Url.Url"],"UrlRequested":["Browser.UrlRequest"],"OpenThread":["View.EmploymentHistory.Thread"],"CloseThread":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 

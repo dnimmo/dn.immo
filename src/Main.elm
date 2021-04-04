@@ -6,16 +6,20 @@ import Components exposing (globalStyles, mainLayout, menu)
 import Element exposing (..)
 import Element.Background as Background
 import Html.Events exposing (onClick)
+import Ports.Viewport exposing (viewportSizeChanged)
 import Route exposing (Route(..), pushUrl)
 import Url exposing (Url)
 import View.Blogs as Blogs
 import View.EmploymentHistory as EmploymentHistory exposing (State(..))
 import View.Homepage as Homepage
+import View.Projects as Projects
+import Viewport exposing (Viewport, ViewportDetails, classify)
 
 
 type alias Model =
     { navKey : Navigation.Key
     , state : State
+    , viewport : Viewport
     }
 
 
@@ -23,11 +27,13 @@ type State
     = ViewingHomepage
     | ViewingEmploymentHistory EmploymentHistory.State
     | ViewingBlogs
+    | ViewingProjects
     | Error String
 
 
 type Msg
-    = UrlChanged Url
+    = ViewportChanged ViewportDetails
+    | UrlChanged Url
     | UrlRequested Browser.UrlRequest
     | OpenThread EmploymentHistory.Thread
     | CloseThread
@@ -50,6 +56,9 @@ getStateFromUrl url =
                 Blogs ->
                     ViewingBlogs
 
+                Projects ->
+                    ViewingProjects
+
                 _ ->
                     Error "Not done yet"
 
@@ -57,6 +66,11 @@ getStateFromUrl url =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        ViewportChanged details ->
+            ( { model | viewport = classify details }
+            , Cmd.none
+            )
+
         UrlRequested (Internal url) ->
             ( { model
                 | state = getStateFromUrl url
@@ -73,7 +87,7 @@ update msg model =
             ( { model
                 | state =
                     ViewingEmploymentHistory <|
-                        DisplayingThread thread
+                        DisplayingThread model.viewport thread
               }
             , Cmd.none
             )
@@ -120,6 +134,9 @@ view model =
 
                         ViewingBlogs ->
                             Blogs.slug
+
+                        ViewingProjects ->
+                            Projects.slug
                     )
                     channelList
                 , case model.state of
@@ -143,15 +160,19 @@ view model =
 
                     ViewingBlogs ->
                         Blogs.view
+
+                    ViewingProjects ->
+                        Projects.view
                 ]
         ]
     }
 
 
-init : () -> Url -> Navigation.Key -> ( Model, Cmd Msg )
-init _ url key =
+init : ViewportDetails -> Url -> Navigation.Key -> ( Model, Cmd Msg )
+init viewportDetails url key =
     ( { navKey = key
       , state = getStateFromUrl url
+      , viewport = classify viewportDetails
       }
     , Cmd.none
     )
@@ -159,7 +180,7 @@ init _ url key =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    viewportSizeChanged ViewportChanged
 
 
 main =

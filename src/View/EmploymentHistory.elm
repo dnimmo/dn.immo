@@ -1,10 +1,12 @@
 module View.EmploymentHistory exposing (..)
 
 import Colours
-import Components exposing (channelHeading, date, post, threadLink)
+import Components exposing (channelHeading, closeButton, date, edges, post, threadLink)
 import Content.EmploymentHistory as EmploymentHistory exposing (EmploymentHistory)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
+import Viewport exposing (Viewport(..))
 
 
 slug =
@@ -18,7 +20,7 @@ type alias Thread =
 
 
 type State
-    = DisplayingThread Thread
+    = DisplayingThread Viewport Thread
     | NotDisplayingThread
 
 
@@ -42,17 +44,35 @@ employmentPost openThreadMsg item =
         ]
 
 
-thread : Thread -> Element msg
-thread { title, contents } =
+thread : msg -> Viewport -> Thread -> Element msg
+thread closeMsg viewport { title, contents } =
     column
         [ height fill
-        , width fill
         , Background.color Colours.white
+        , alignRight
+        , Border.widthEach { edges | left = 1 }
+        , Border.color Colours.mediumGrey
+        , case viewport of
+            Narrow _ ->
+                width fill
+
+            Medium details ->
+                width (fill |> maximum (details.width - 400))
         ]
-        [ channelHeading
-            { name = "Thread"
-            , description = title
-            }
+        [ row [ width fill ]
+            [ channelHeading
+                { name = "Thread"
+                , description = title
+                }
+            , el
+                [ Border.widthEach { edges | bottom = 1 }
+                , Border.color Colours.mediumGrey
+                , height fill
+                , width <| px 40
+                ]
+              <|
+                closeButton closeMsg
+            ]
         , post contents Nothing
         ]
 
@@ -75,8 +95,8 @@ view state { openThreadMsg, closeThreadMsg } =
                 NotDisplayingThread ->
                     none
 
-                DisplayingThread content ->
-                    thread content
+                DisplayingThread viewport content ->
+                    thread closeThreadMsg viewport content
         ]
     <|
         List.concat

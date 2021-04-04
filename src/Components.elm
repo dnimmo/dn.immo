@@ -308,3 +308,14 @@ threadLink msg =
                 ]
         , onPress = Just msg
         }
+
+
+closeButton : msg -> Element msg
+closeButton msg =
+    Input.button
+        [ width fill
+        , height fill
+        ]
+        { label = el [ centerX, centerY ] <| Icons.close
+        , onPress = Just msg
+        }
