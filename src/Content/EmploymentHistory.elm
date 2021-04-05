@@ -21,7 +21,7 @@ content =
       , post =
             [ "Tech Lead at Click Travel - Front-End Architecture Team" ]
       , threadContent =
-            [ "After deliberating over a number of tech choices (The front-runners being React, Vue, Clojurescript, and Elm), I ended up proposing Elm to the software engineering department, and got the go-ahead to introduce it. \n            \nSince then I’ve been leading the front-end team in implementing Elm, coming up with an on-boarding process, documenting our decisions, and supporting other engineers with the shift from React to Elm."
+            [ "After deliberating over a number of tech choices (The front-runners being React, Vue, Clojurescript, and Elm), I ended up proposing Elm to the software engineering department, and got the go-ahead to introduce it. \n            \nSince then I've been leading the front-end team in implementing Elm, coming up with an on-boarding process, documenting our decisions, and supporting other engineers with the shift from React to Elm."
             ]
       }
     , { date = "Apr 2017 - Apr 2019"
@@ -33,7 +33,7 @@ content =
             , "Shortly after joining the team, I set up automated pipelines for all of our projects, I introduced Functional Programming to both the team and the wider department, and introduced a set of coding standards for JavaScript (where none had existed before)"
             , "Over the course of around three months, I refactored our entire codebase in order to give us the ability to have sensible automated tests, and to reduce our recovery time from any live issues, as well as to make the codebase simpler to understand for any new starters we onboard in future."
             , "This was a tremendous success, and led to being able to engender regular and ongoing discussions about our coding standards within the team, which has seen the entire team constantly learn and improve."
-            , "I also led a small team of engineers in the creation of a progressive web app to allow customers to access their travel itinerary, even when they don’t have internet access. This was delivered in a single \"hack week\"."
+            , "I also led a small team of engineers in the creation of a progressive web app to allow customers to access their travel itinerary, even when they don't have internet access. This was delivered in a single \"hack week\"."
             , "Technologies used: ECMAScript 2015+, node.js, Jest, AWS, Bamboo, Elm, React, AngularJS, Webpack, SCSS, RWD, git, Jira, DDD"
             ]
       }
@@ -45,7 +45,7 @@ content =
             , "As lead developer on this application, I was responsible for making technology, architecture, and methodology choices, as well as writing code for the application."
             , "I introduced Docker for development and deployment (utilising Jenkins for continuous integration), and ensured that the team was doing Test-Driven Development, which I made myself available to advise on when necessary."
             , "I was also responsible for supporting and mentoring two less-experienced developers, a role that I have completed a few times over different organisations, and one that I thoroughly enjoy."
-            , "The application featured an administration view, where users could interact directly with the application’s users/user access levels, and featured a number of interactive forms\n\n        \n            The user was required to select individual claims for Winter Fuels payments, and decide which claimants’ records are accurate and correct, and which one of them have potentially been duplicated thanks to errors when the information was first recorded."
+            , "The application featured an administration view, where users could interact directly with the application's users/user access levels, and featured a number of interactive forms\n\n        \n            The user was required to select individual claims for Winter Fuels payments, and decide which claimants' records are accurate and correct, and which one of them have potentially been duplicated thanks to errors when the information was first recorded."
             , "I also became a big fan of Functional Programming during this time, and developed the Winter Fuels Matching Service in this manner, which, combined with a completely modular structure, made the codebase incredibly easy to maintain, and ensured changes were very simple."
             , "In my short time at DWP, I had multiple requests from the Head of Software Engineering to join other projects to enable them to hit the ground running."
             , "Technologies used: ECMAScript 2015+, node.js, Docker, AngularJS, Webpack, SQL, SCSS, RWD, git, Jenkins, Karma, Mocha, Crucible, Jira"
@@ -55,9 +55,9 @@ content =
       , post =
             [ "Senior Applications Developer at Nomad Digital" ]
       , threadContent =
-            [ "An overhaul of Nomad Digital’s current technology stack and working practices, in which they are moving from a combination of legacy systems, mostly written in Python and Java, to instead use open-source technologies."
+            [ "An overhaul of Nomad Digital's current technology stack and working practices, in which they are moving from a combination of legacy systems, mostly written in Python and Java, to instead use open-source technologies."
             , "My responsibilities included aiding the introduction of BDD (behaviour-driven development) into the company, as well as providing support and training to the front-end web development team whilst developing the node.js back-end."
-            , "After identifying inconsistencies in the existing codebase, I also took charge of simplifying the application’s code in order to ensure its future maintainability, by splitting it up into sensible modules."
+            , "After identifying inconsistencies in the existing codebase, I also took charge of simplifying the application's code in order to ensure its future maintainability, by splitting it up into sensible modules."
             , "Technologies used: Java, AngularJS, node.js, Nginx, Docker, Kubernetes, gulp, SCSS, RWD, Git, Jenkins, Cucumber, Gherkin, Karma, Protractor, Crucible, Jira"
             ]
       }
@@ -65,8 +65,8 @@ content =
       , post =
             [ "Technical Design Lead at British Airways - Core Engineering Team" ]
       , threadContent =
-            [ "A massive greenfield project bringing British Airways’ web platform up to date with modern development practices and technologies, moving it away from an increasingly difficult-to-maintain legacy platform and creating an MVC architecture in its place. As one of a team of six Technical Design Leads, my responsibilities included:"
-            , "Evaluating and selecting tools/technologies to be included in BA’s new development stack"
+            [ "A massive greenfield project bringing British Airways' web platform up to date with modern development practices and technologies, moving it away from an increasingly difficult-to-maintain legacy platform and creating an MVC architecture in its place. As one of a team of six Technical Design Leads, my responsibilities included:"
+            , "Evaluating and selecting tools/technologies to be included in BA's new development stack"
             , "Delivering standards and patterns for the use of selected tools/technologies"
             , "Supporting, and reviewing code from, five development teams totalling over 70 developers who are developing their first applications under the new architecture"
             , "Providing and maintaining Yeoman generators for new applications and libraries"
@@ -90,7 +90,7 @@ content =
             [ "Technical Design Lead at British Airways - ba.com (Information Site)" ]
       , threadContent =
             [ "The first project to be built in Interwoven's 'LiveSite' CMS, requiring standards to be set in its use, as well as investigation into its inner workings."
-            , "Lead a team of contracted developers to deliver a website that allow BA’s editorial team to maintain using a simple drag-and-drop interface."
+            , "Lead a team of contracted developers to deliver a website that allow BA's editorial team to maintain using a simple drag-and-drop interface."
             , "Technologies used: jQuery, LiveSite, Java, SVN, Maven, SOLR"
             ]
       }
