@@ -8,6 +8,7 @@ import Content.EmploymentHistory as EmploymentHistory exposing (EmploymentHistor
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Html.Attributes exposing (style)
 import Json.Decode exposing (maybe)
 import Viewport exposing (Viewport(..))
 
@@ -107,6 +108,7 @@ view state slideState { openThreadMsg, closeThreadMsg } =
     column
         [ height fill
         , width fill
+        , htmlAttribute <| style "overflow-x" "hidden"
         , darkenContent slideState
         , inFront <|
             case state of
