@@ -1,13 +1,17 @@
 module Main exposing (main)
 
+import Animations exposing (SlideState(..))
+import Animator
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Navigation
 import Components exposing (globalStyles, mainLayout, menu)
 import Element exposing (..)
 import Element.Background as Background
+import Html exposing (q)
 import Html.Events exposing (onClick)
 import Ports.Viewport exposing (viewportSizeChanged)
 import Route exposing (Route(..), pushUrl)
+import Time
 import Url exposing (Url)
 import View.Blogs as Blogs
 import View.EmploymentHistory as EmploymentHistory exposing (State(..))
@@ -21,6 +25,7 @@ type alias Model =
     { navKey : Navigation.Key
     , state : State
     , viewport : Viewport
+    , threadState : Animator.Timeline SlideState
     }
 
 
@@ -34,15 +39,16 @@ type State
 
 
 type Msg
-    = ViewportChanged ViewportDetails
+    = RuntimeTriggeredAnimationStep Time.Posix
+    | ViewportChanged ViewportDetails
     | UrlChanged Url
     | UrlRequested Browser.UrlRequest
     | OpenThread EmploymentHistory.Thread
     | CloseThread
 
 
-getStateFromUrl : Url -> State
-getStateFromUrl url =
+getStateFromUrl : Url -> Viewport -> State
+getStateFromUrl url viewport =
     case Route.fromUrl url of
         Nothing ->
             Error <| "No page found for " ++ url.path
@@ -53,7 +59,7 @@ getStateFromUrl url =
                     ViewingHomepage
 
                 EmploymentHistory ->
-                    ViewingEmploymentHistory NotDisplayingThread
+                    ViewingEmploymentHistory <| NotDisplayingThread viewport Nothing
 
                 Blogs ->
                     ViewingBlogs
@@ -68,6 +74,11 @@ getStateFromUrl url =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        RuntimeTriggeredAnimationStep newTime ->
+            ( Animator.update newTime animator model
+            , Cmd.none
+            )
+
         ViewportChanged details ->
             ( { model | viewport = classify details }
             , Cmd.none
@@ -75,7 +86,7 @@ update msg model =
 
         UrlRequested (Internal url) ->
             ( { model
-                | state = getStateFromUrl url
+                | state = getStateFromUrl url model.viewport
               }
             , pushUrl model.navKey <|
                 Maybe.withDefault General <|
@@ -90,13 +101,26 @@ update msg model =
                 | state =
                     ViewingEmploymentHistory <|
                         DisplayingThread model.viewport thread
+                , threadState =
+                    Animator.go Animator.slowly Opening model.threadState
               }
             , Cmd.none
             )
 
         CloseThread ->
+            let
+                maybeThread =
+                    case model.state of
+                        ViewingEmploymentHistory (DisplayingThread viewport thread) ->
+                            Just thread
+
+                        _ ->
+                            Nothing
+            in
             ( { model
-                | state = ViewingEmploymentHistory NotDisplayingThread
+                | state = ViewingEmploymentHistory <| NotDisplayingThread model.viewport maybeThread
+                , threadState =
+                    Animator.go Animator.slowly Closed model.threadState
               }
             , Cmd.none
             )
@@ -170,6 +194,7 @@ view model =
 
                         ViewingEmploymentHistory state ->
                             EmploymentHistory.view state
+                                model.threadState
                                 { openThreadMsg = OpenThread
                                 , closeThreadMsg = CloseThread
                                 }
@@ -187,11 +212,29 @@ view model =
     }
 
 
+animator : Animator.Animator Model
+animator =
+    Animator.animator
+        |> Animator.watchingWith
+            .threadState
+            (\updatedValue model ->
+                { model | threadState = updatedValue }
+            )
+            (\threadState ->
+                threadState == Opening
+            )
+
+
 init : ViewportDetails -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init viewportDetails url key =
+    let
+        viewport =
+            classify viewportDetails
+    in
     ( { navKey = key
-      , state = getStateFromUrl url
-      , viewport = classify viewportDetails
+      , state = getStateFromUrl url viewport
+      , viewport = viewport
+      , threadState = Animator.init Closed
       }
     , Cmd.none
     )
@@ -199,7 +242,10 @@ init viewportDetails url key =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    viewportSizeChanged ViewportChanged
+    Sub.batch
+        [ viewportSizeChanged ViewportChanged
+        , Animator.toSubscription RuntimeTriggeredAnimationStep model animator
+        ]
 
 
 main =

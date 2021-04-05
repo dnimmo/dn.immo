@@ -1,11 +1,14 @@
 module View.EmploymentHistory exposing (..)
 
+import Animations exposing (SlideState, darkenContent, slideInOutFromRight)
+import Animator
 import Colours
 import Components exposing (channelHeading, closeButton, date, edges, post, threadLink)
 import Content.EmploymentHistory as EmploymentHistory exposing (EmploymentHistory)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Json.Decode exposing (maybe)
 import Viewport exposing (Viewport(..))
 
 
@@ -21,43 +24,50 @@ type alias Thread =
 
 type State
     = DisplayingThread Viewport Thread
-    | NotDisplayingThread
+    | NotDisplayingThread Viewport (Maybe Thread)
 
 
-employmentPost : (Thread -> msg) -> EmploymentHistory -> Element msg
-employmentPost openThreadMsg item =
+employmentPost : (Thread -> msg) -> Bool -> EmploymentHistory -> Element msg
+employmentPost openThreadMsg displayThreadLink item =
     column
         [ width fill
         , height fill
         ]
         [ date item.date
         , post item.post "Nimmo" <|
-            Just <|
-                threadLink <|
-                    openThreadMsg
-                        { title =
-                            Maybe.withDefault "" <|
-                                List.head
-                                    item.post
-                        , contents = item.threadContent
-                        }
+            if displayThreadLink then
+                Just <|
+                    threadLink <|
+                        openThreadMsg
+                            { title =
+                                Maybe.withDefault "" <|
+                                    List.head
+                                        item.post
+                            , contents = item.threadContent
+                            }
+
+            else
+                Just <| el [ height <| px 37 ] <| none
         ]
 
 
-thread : msg -> Viewport -> Thread -> Element msg
-thread closeMsg viewport { title, contents } =
+thread : msg -> Viewport -> Animator.Timeline SlideState -> Thread -> Element msg
+thread closeMsg viewport slideState { title, contents } =
     column
-        [ height fill
+        [ slideInOutFromRight slideState <|
+            toFloat <|
+                case viewport of
+                    Narrow { width } ->
+                        width
+
+                    Medium { width } ->
+                        width
+        , height fill
         , Background.color Colours.white
         , alignRight
         , Border.widthEach { edges | left = 1 }
         , Border.color Colours.mediumGrey
-        , Border.shadow
-            { blur = 1000
-            , color = Colours.shadow
-            , offset = ( 0, 0 )
-            , size = 1000
-            }
+        , scrollbarY
         , case viewport of
             Narrow _ ->
                 width fill
@@ -67,14 +77,14 @@ thread closeMsg viewport { title, contents } =
         ]
         [ row [ width fill ]
             [ channelHeading
-                { name = "Thread"
+                { name = "Employment history"
                 , description = title
                 }
             , el
                 [ Border.widthEach { edges | bottom = 1 }
                 , Border.color Colours.mediumGrey
                 , height fill
-                , width <| px 40
+                , width <| px 60
                 ]
               <|
                 closeButton closeMsg
@@ -85,6 +95,7 @@ thread closeMsg viewport { title, contents } =
 
 view :
     State
+    -> Animator.Timeline SlideState
     ->
         { openThreadMsg :
             Thread
@@ -92,17 +103,23 @@ view :
         , closeThreadMsg : msg
         }
     -> Element msg
-view state { openThreadMsg, closeThreadMsg } =
+view state slideState { openThreadMsg, closeThreadMsg } =
     column
         [ height fill
         , width fill
+        , darkenContent slideState
         , inFront <|
             case state of
-                NotDisplayingThread ->
-                    none
+                NotDisplayingThread viewport maybeContent ->
+                    thread closeThreadMsg viewport slideState <|
+                        Maybe.withDefault
+                            { title = ""
+                            , contents = []
+                            }
+                            maybeContent
 
                 DisplayingThread viewport content ->
-                    thread closeThreadMsg viewport content
+                    thread closeThreadMsg viewport slideState content
         ]
     <|
         List.concat
@@ -111,5 +128,14 @@ view state { openThreadMsg, closeThreadMsg } =
                     , description = "Information about my employment history. Details in threads."
                     }
               ]
-            , List.map (employmentPost openThreadMsg) EmploymentHistory.content
+            , List.map
+                (employmentPost openThreadMsg <|
+                    case state of
+                        NotDisplayingThread _ _ ->
+                            True
+
+                        DisplayingThread _ _ ->
+                            False
+                )
+                EmploymentHistory.content
             ]
