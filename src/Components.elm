@@ -1,5 +1,6 @@
 module Components exposing (..)
 
+import Animations exposing (SlideState(..))
 import Colours
 import Element exposing (..)
 import Element.Background as Background
@@ -8,6 +9,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region exposing (description)
 import Icons
+import Viewport exposing (Viewport(..))
 
 
 globalStyles =
@@ -82,45 +84,86 @@ navigationItem active slug =
         }
 
 
-navigation : String -> List String -> Element msg
-navigation activeItem slugs =
+navigation : SlideState -> msg -> String -> List String -> Element msg
+navigation menuState toggleMsg activeItem slugs =
     column
         [ paddingXY 0 20
         , width fill
         ]
-        [ row
-            [ height fill
-            , spacing 5
-            , paddingEach { edges | left = 20 }
-            ]
-            [ el [ moveUp 2 ]
-                Icons.arrowDown
-            , el
-                [ Region.heading 2
-                , Font.size 18
-                ]
-              <|
-                text "Channels"
-            ]
-        , column
-            [ width fill
-            , paddingEach { edges | top = 8 }
-            ]
-          <|
-            List.map (\str -> navigationItem (str == activeItem) str) slugs
+        [ Input.button [ width fill ]
+            { onPress = Just toggleMsg
+            , label =
+                row
+                    [ height fill
+                    , width fill
+                    , spacing 5
+                    , paddingEach { edges | left = 20 }
+                    ]
+                    [ el [ moveUp 2 ] <|
+                        case menuState of
+                            Opening ->
+                                Icons.arrowDown
+
+                            Closed ->
+                                Icons.arrowRight
+                    , el
+                        [ Region.heading 2
+                        , Font.size 18
+                        ]
+                      <|
+                        text "Channels"
+                    ]
+            }
+        , case menuState of
+            Opening ->
+                column
+                    [ width fill
+                    , paddingEach { edges | top = 8 }
+                    ]
+                <|
+                    List.map
+                        (\str ->
+                            navigationItem (str == activeItem) str
+                        )
+                        slugs
+
+            Closed ->
+                none
         ]
 
 
-menu : String -> List String -> Element msg
-menu activeItem channels =
+menu : SlideState -> msg -> Viewport -> String -> List String -> Element msg
+menu menuState toggleMsg viewport activeItem channels =
+    let
+        viewportSpecific =
+            case viewport of
+                Narrow _ ->
+                    [ width fill
+                    , height <|
+                        px <|
+                            case menuState of
+                                Closed ->
+                                    140
+
+                                Opening ->
+                                    300
+                    ]
+
+                Medium _ ->
+                    [ width <| px 256
+                    , height fill
+                    ]
+    in
     column
-        [ height fill
-        , width <| px 256
-        , Background.color Colours.darkBlue
-        , Font.color Colours.menuWhite
-        ]
+        ([ height fill
+         , width <| px 256
+         , Background.color Colours.darkBlue
+         , Font.color Colours.menuWhite
+         ]
+            ++ viewportSpecific
+        )
         [ siteHeading
-        , navigation activeItem channels
+        , navigation menuState toggleMsg activeItem channels
         ]
 
 
@@ -158,11 +201,20 @@ siteHeading =
         ]
 
 
-mainLayout =
-    row
-        [ width fill
-        , height fill
-        ]
+mainLayout : Viewport -> List (Element msg) -> Element msg
+mainLayout viewport =
+    case viewport of
+        Narrow _ ->
+            column
+                [ width fill
+                , height fill
+                ]
+
+        Medium _ ->
+            row
+                [ width fill
+                , height fill
+                ]
 
 
 channelHeading { name, description } =
@@ -268,9 +320,15 @@ postItem avatarElement content name maybeFinalElement =
             , spacing 32
             ]
           <|
-            [ el [ Font.medium ] <| text name
+            [ paragraph [] [ el [ Font.medium ] <| text name ]
             ]
-                ++ List.map (\str -> paragraph [ spacing 10 ] [ text str ]) content
+                ++ List.map
+                    (\str ->
+                        paragraph
+                            [ spacing 10 ]
+                            [ text str ]
+                    )
+                    content
                 ++ (case maybeFinalElement of
                         Just element ->
                             [ element ]

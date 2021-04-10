@@ -26,6 +26,7 @@ type alias Model =
     , state : State
     , viewport : Viewport
     , threadState : Animator.Timeline SlideState
+    , menuState : SlideState
     }
 
 
@@ -45,6 +46,7 @@ type Msg
     | UrlRequested Browser.UrlRequest
     | OpenThread EmploymentHistory.Thread
     | CloseThread
+    | ToggleMenu
 
 
 getStateFromUrl : Url -> Viewport -> State
@@ -96,6 +98,19 @@ update msg model =
         UrlRequested (External url) ->
             ( model, Navigation.load url )
 
+        ToggleMenu ->
+            ( { model
+                | menuState =
+                    case model.menuState of
+                        Opening ->
+                            Closed
+
+                        Closed ->
+                            Opening
+              }
+            , Cmd.none
+            )
+
         OpenThread thread ->
             ( { model
                 | state =
@@ -146,33 +161,30 @@ view model =
         [ layout
             globalStyles
           <|
-            mainLayout
-                [ case model.viewport of
-                    Narrow _ ->
-                        none
+            mainLayout model.viewport
+                [ menu model.menuState
+                    ToggleMenu
+                    model.viewport
+                    (case model.state of
+                        Error _ ->
+                            ""
 
-                    Medium _ ->
-                        menu
-                            (case model.state of
-                                Error _ ->
-                                    ""
+                        ViewingHomepage ->
+                            Homepage.slug
 
-                                ViewingHomepage ->
-                                    Homepage.slug
+                        ViewingEmploymentHistory _ ->
+                            EmploymentHistory.slug
 
-                                ViewingEmploymentHistory _ ->
-                                    EmploymentHistory.slug
+                        ViewingBlogs ->
+                            Blogs.slug
 
-                                ViewingBlogs ->
-                                    Blogs.slug
+                        ViewingProjects ->
+                            Projects.slug
 
-                                ViewingProjects ->
-                                    Projects.slug
-
-                                ViewingRecommendations ->
-                                    Recommendations.slug
-                            )
-                            channelList
+                        ViewingRecommendations ->
+                            Recommendations.slug
+                    )
+                    channelList
                 , el
                     [ scrollbarY
                     , width fill
@@ -235,6 +247,13 @@ init viewportDetails url key =
       , state = getStateFromUrl url viewport
       , viewport = viewport
       , threadState = Animator.init Closed
+      , menuState =
+            case viewport of
+                Narrow _ ->
+                    Closed
+
+                Medium _ ->
+                    Opening
       }
     , Cmd.none
     )
